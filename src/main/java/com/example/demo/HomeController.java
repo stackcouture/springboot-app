@@ -18,7 +18,7 @@ public class HomeController {
     }
 
     // Cart Page
-    @GetMapping("/properties-details")
+    @GetMapping("/property-details")
     public String propertydetails() {
         return "propertydetails";
     }
