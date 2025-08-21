@@ -15,7 +15,6 @@ jobs:
       - name: Determine Commit SHA
         id: commit
         run: |
-          COMMIT_SHA="${{ github.event.inputs.COMMIT_SHA }}"
           COMMIT_SHA=$(git rev-parse HEAD)
           COMMIT_SHA_WITH_BUILD="${COMMIT_SHA}-${{ github.run_number }}"
           echo "COMMIT_SHA_WITH_BUILD=$COMMIT_SHA_WITH_BUILD" >> $GITHUB_ENV
@@ -48,3 +47,11 @@ jobs:
         run: |
           echo "Generating Javadoc..."
           mvn javadoc:javadoc
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: target/site/jacoco/
+
+      
