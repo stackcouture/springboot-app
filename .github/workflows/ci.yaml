@@ -6,8 +6,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
-
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,7 +22,7 @@ jobs:
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
-          maven-version: '3.9.6' # Change to match 'Maven3'
+          maven-version: '3.9.6' 
 
       - name: Determine Commit SHA
         id: commit
@@ -34,7 +33,12 @@ jobs:
           echo "COMMIT_SHA_WITH_BUILD=$COMMIT_SHA_WITH_BUILD" >> $GITHUB_ENV
           echo "Commit SHA with build number: $COMMIT_SHA_WITH_BUILD"
 
-      - name: Clean workspace
+      - name: Build + Test
         run: |
-          echo "Cleaning workspace..."
-          git clean -fdx
+          echo "Building and running tests..."
+          mvn clean verify jacoco:report
+
+      - name: Build + Test
+        run: |
+          echo "Generating Javadoc..."
+          mvn javadoc:javadoc
