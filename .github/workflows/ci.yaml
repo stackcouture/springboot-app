@@ -1,0 +1,40 @@
+name: Java Spring App Deployment
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: '3.9.6' # Change to match 'Maven3'
+
+      - name: Determine Commit SHA
+        id: commit
+        run: |
+          COMMIT_SHA="${{ github.event.inputs.COMMIT_SHA }}"
+          COMMIT_SHA=$(git rev-parse HEAD)
+          COMMIT_SHA_WITH_BUILD="${COMMIT_SHA}-${{ github.run_number }}"
+          echo "COMMIT_SHA_WITH_BUILD=$COMMIT_SHA_WITH_BUILD" >> $GITHUB_ENV
+          echo "Commit SHA with build number: $COMMIT_SHA_WITH_BUILD"
+
+      - name: Clean workspace
+        run: |
+          echo "Cleaning workspace..."
+          git clean -fdx
