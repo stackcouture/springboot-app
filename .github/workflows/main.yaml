@@ -67,21 +67,20 @@ jobs:
     uses: ./.github/workflows/trivy-fs.yaml
     with:
       scan-path: .
-
   
   sonar-scan:
     needs: security-fs-scan
     uses: ./.github/workflows/sonar-scan.yaml
-     with:
-    project-key: sprintboot-app
-    main-sources: src/main/java
-    test-sources: src/test/java
-    binaries: target/classes
-    exclusions: "**/*.js"
-    jacoco-report: target/site/jacoco/jacoco.xml
-  secrets:
-    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-    SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+    with:
+      project-key: sprintboot-app
+      main-sources: src/main/java
+      test-sources: src/test/java
+      binaries: target/classes
+      exclusions: "**/*.js"
+      jacoco-report: target/site/jacoco/jacoco.xml
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
   
 
