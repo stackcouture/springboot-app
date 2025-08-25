@@ -1,4 +1,5 @@
 name: Java Spring App Deployment
+
 on:
   push:
     branches: [ "main" ]
@@ -7,7 +8,7 @@ on:
 
 jobs:
   checkout:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
@@ -21,7 +22,7 @@ jobs:
           echo "Commit SHA with build number: $COMMIT_SHA_WITH_BUILD"
 
   build:
-    runs-on: Agent-1
+    runs-on: self-hosted
     needs: checkout
     steps:
       - name: Checkout Repo
@@ -38,15 +39,13 @@ jobs:
         with:
           maven-version: '3.9.6' 
 
-      - name: Build + Test
+      - name: Build + Test + Jacoco
         run: |
-          echo "Building and running tests..."
+          echo "Building project, running tests, and generating Jacoco report..."
           mvn clean verify jacoco:report
 
       - name: Generate Javadoc
-        run: |
-          echo "Generating Javadoc..."
-          mvn javadoc:javadoc
+        run: mvn javadoc:javadoc
 
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v4
@@ -60,39 +59,18 @@ jobs:
     with:
       scan-path: .
 
-    
-  
-  # sonar-scan:
-  #   needs: security-fs-scan
-  #   uses: ./.github/workflows/sonar-scan.yaml
-  #   with:
-  #     project-key: sprintboot-app
-  #     main-sources: src/main/java
-  #     test-sources: src/test/java
-  #     binaries: target/classes
-  #     exclusions: "**/*.js"
-  #     jacoco-report: target/site/jacoco/jacoco.xml
-  #   secrets:
-  #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-  #     SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-
   sonar-scan:
     needs: security-fs-scan
     uses: ./.github/workflows/sonar-scan.yaml
     with:
       project-key: sprintboot-app
-      sources: src/main/java,src/test/java
+      sources: src/main/java
+      tests: src/test/java
       binaries: target/classes
+      test-binaries: target/test-classes
       exclusions: "**/*.js"
       jacoco-report: target/site/jacoco/jacoco.xml
       scanner-tool: mvn
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-
-  
-
-
-
-
-      

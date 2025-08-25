@@ -8,12 +8,12 @@ on:
         required: true
         type: string
       sources:
-        description: "Source directories (comma-separated)"
+        description: "Main source directories"
         required: false
         default: "src/main/java"
         type: string
       tests:
-        description: "Test directories (comma-separated)"
+        description: "Test source directories"
         required: false
         default: "src/test/java"
         type: string
@@ -21,6 +21,11 @@ on:
         description: "Compiled classes path"
         required: false
         default: "target/classes"
+        type: string
+      test-binaries:
+        description: "Compiled test classes path"
+        required: false
+        default: "target/test-classes"
         type: string
       exclusions:
         description: "File patterns to exclude"
@@ -51,16 +56,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Java 17
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: temurin
-
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.5
-        with:
-          maven-version: 3.9.6
 
       - name: Run SonarQube Scan
         run: |
@@ -71,6 +71,7 @@ jobs:
               -Dsonar.sources="${{ inputs.sources }}" \
               -Dsonar.tests="${{ inputs.tests }}" \
               -Dsonar.java.binaries="${{ inputs.binaries }}" \
+              -Dsonar.java.test.binaries="${{ inputs.test-binaries }}" \
               -Dsonar.exclusions="${{ inputs.exclusions }}" \
               -Dsonar.coverage.jacoco.xmlReportPaths="${{ inputs['jacoco-report'] }}" \
               -Dsonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
@@ -82,6 +83,7 @@ jobs:
               -Dsonar.sources="${{ inputs.sources }}" \
               -Dsonar.tests="${{ inputs.tests }}" \
               -Dsonar.java.binaries="${{ inputs.binaries }}" \
+              -Dsonar.java.test.binaries="${{ inputs.test-binaries }}" \
               -Dsonar.exclusions="${{ inputs.exclusions }}" \
               -Dsonar.coverage.jacoco.xmlReportPaths="${{ inputs['jacoco-report'] }}" \
               -Dsonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
