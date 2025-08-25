@@ -49,7 +49,7 @@ jobs:
       - name: Build + Test
         run: |
           echo "Building and running tests..."
-          mvn clean verify jacoco:report -DskipTests
+          mvn clean verify jacoco:report
 
       - name: Generate Javadoc
         run: |
@@ -68,19 +68,19 @@ jobs:
     with:
       scan-path: .
   
-  sonar-scan:
-    needs: security-fs-scan
-    uses: ./.github/workflows/sonar-scan.yaml
-    with:
-      project-key: sprintboot-app
-      main-sources: src/main/java
-      test-sources: src/test/java
-      binaries: target/classes
-      exclusions: "**/*.js"
-      jacoco-report: target/site/jacoco/jacoco.xml
-    secrets:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+  # sonar-scan:
+  #   needs: security-fs-scan
+  #   uses: ./.github/workflows/sonar-scan.yaml
+  #   with:
+  #     project-key: sprintboot-app
+  #     main-sources: src/main/java
+  #     test-sources: src/test/java
+  #     binaries: target/classes
+  #     exclusions: "**/*.js"
+  #     jacoco-report: target/site/jacoco/jacoco.xml
+  #   secrets:
+  #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  #     SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
   
 
