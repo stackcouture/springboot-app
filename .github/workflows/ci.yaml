@@ -55,10 +55,9 @@ jobs:
           path: target/site/jacoco/
 
   trivy-fs-scan:
-    name: Trivy FS Scan
     runs-on: ubuntu-latest
+    needs: checkout
     timeout-minutes: 10
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
