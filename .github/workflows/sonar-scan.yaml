@@ -8,7 +8,7 @@ on:
         required: true
         type: string
       sources:
-        description: "Source directories"
+        description: "Source directories to scan (comma-separated)"
         required: false
         default: "src/main/java,src/test/java"
         type: string
@@ -57,20 +57,23 @@ jobs:
           echo "Running SonarQube scan for project: ${{ inputs['project-key'] }}"
           if [[ "${{ inputs['scanner-tool'] }}" == "mvn" ]]; then
             mvn sonar:sonar \
-              -Dsonar.projectKey=${{ inputs['project-key'] }} \
+              -Dsonar.projectKey="${{ inputs['project-key'] }}" \
               -Dsonar.sources="${{ inputs.sources }}" \
+              -Dsonar.tests="${{ inputs.sources }}" \
               -Dsonar.java.binaries="${{ inputs.binaries }}" \
               -Dsonar.exclusions="${{ inputs.exclusions }}" \
               -Dsonar.coverage.jacoco.xmlReportPaths="${{ inputs['jacoco-report'] }}" \
-              -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
-              -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+              -Dsonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
+              -Dsonar.login="${{ secrets.SONAR_TOKEN }}"
           else
-            # Assume scanner-tool is sonar-scanner CLI
+            # Use Sonar Scanner CLI
             ${{ inputs['scanner-tool'] }}/bin/sonar-scanner \
               -Dsonar.projectKey="${{ inputs['project-key'] }}" \
               -Dsonar.sources="${{ inputs.sources }}" \
+              -Dsonar.tests="${{ inputs.sources }}" \
               -Dsonar.java.binaries="${{ inputs.binaries }}" \
               -Dsonar.exclusions="${{ inputs.exclusions }}" \
               -Dsonar.coverage.jacoco.xmlReportPaths="${{ inputs['jacoco-report'] }}" \
-              -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
-              -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+              -Dsonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
+              -Dsonar.login="${{ secrets.SONAR_TOKEN }}"
+          fi
