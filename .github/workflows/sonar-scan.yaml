@@ -66,12 +66,11 @@ jobs:
               -Dsonar.login=${{ secrets.SONAR_TOKEN }}
           else
             # Assume scanner-tool is sonar-scanner CLI
-            "${{ inputs['scanner-tool'] }}/bin/sonar-scanner" \
+            ${{ inputs['scanner-tool'] }}/bin/sonar-scanner \
               -Dsonar.projectKey="${{ inputs['project-key'] }}" \
               -Dsonar.sources="${{ inputs.sources }}" \
               -Dsonar.java.binaries="${{ inputs.binaries }}" \
               -Dsonar.exclusions="${{ inputs.exclusions }}" \
               -Dsonar.coverage.jacoco.xmlReportPaths="${{ inputs['jacoco-report'] }}" \
               -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
-              -Dsonar.login=${{ secrets.SONAR_TOKEN }}"
-          fi
+              -Dsonar.login=${{ secrets.SONAR_TOKEN }}
