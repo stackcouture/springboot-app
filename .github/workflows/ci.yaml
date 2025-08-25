@@ -54,4 +54,40 @@ jobs:
           name: jacoco-report
           path: target/site/jacoco/
 
+  trivy-fs-scan:
+    name: Trivy FS Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: .
+
+      - name: Download Trivy HTML template
+        run: |
+          mkdir -p contrib
+          curl -sSL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -o contrib/html.tpl
+
+      - name: Run Trivy Filesystem Scan with custom template
+        run: |
+          trivy fs . \
+            --format template \
+            --template "@contrib/html.tpl" \
+            --output trivy-fs-report.html
+
+      - name: Upload Trivy FS Report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-fs-report
+          path: trivy-fs-report.html
+
+
+
+
       
