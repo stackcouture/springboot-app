@@ -4,11 +4,10 @@ on:
   workflow_call:
     inputs:
       scan-path:
-        description: Path to scan (default: current directory)
+        description: "Path to scan (default: current directory)"
         required: false
         default: "."
         type: string
-    secrets: {}
 
 jobs:
   trivy-fs-scan:
