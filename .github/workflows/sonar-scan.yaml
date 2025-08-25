@@ -41,7 +41,7 @@ on:
 
 jobs:
   sonar-scan:
-    runs-on: ubuntu-latest
+    runs-on: Agent-1
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

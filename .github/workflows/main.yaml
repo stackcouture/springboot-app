@@ -32,14 +32,6 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      
-      - name: Cache Maven repository
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
 
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
@@ -61,10 +53,6 @@ jobs:
         with:
           name: jacoco-report
           path: target/site/jacoco/
-      
-      - name: Test SonarQube connectivity
-        run: |
-          curl -v ${{ secrets.SONAR_HOST_URL }}
 
   security-fs-scan:
     needs: build
