@@ -1,0 +1,43 @@
+name: Trivy FS Scan
+
+on:
+  workflow_call:
+    inputs:
+      scan-path:
+        description: Path to scan (default: current directory)
+        required: false
+        default: "."
+        type: string
+    secrets: {}
+
+jobs:
+  trivy-fs-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: ${{ inputs.scan-path }}
+
+      - name: Download Trivy HTML template
+        run: |
+          mkdir -p contrib
+          curl -sSL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -o contrib/html.tpl
+
+      - name: Run Trivy Filesystem Scan with custom template
+        run: |
+          trivy fs ${{ inputs.scan-path }} \
+            --format template \
+            --template "@contrib/html.tpl" \
+            --output trivy-fs-report.html
+
+      - name: Upload Trivy FS Report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-fs-report
+          path: trivy-fs-report.html
