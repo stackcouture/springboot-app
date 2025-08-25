@@ -82,6 +82,20 @@ jobs:
   #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   #     SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
+  sonar-scan:
+    needs: security-fs-scan
+    uses: ./.github/workflows/sonar-scan.yaml
+    with:
+      project-key: sprintboot-app
+      sources: src/main/java,src/test/java
+      binaries: target/classes
+      exclusions: "**/*.js"
+      jacoco-report: target/site/jacoco/jacoco.xml
+      scanner-tool: mvn
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
   
 
 

@@ -7,18 +7,13 @@ on:
         description: "SonarQube project key"
         required: true
         type: string
-      main-sources:
-        description: "Main source directories to scan"
+      sources:
+        description: "Source directories"
         required: false
-        default: "src/main/java"
-        type: string
-      test-sources:
-        description: "Test source directories"
-        required: false
-        default: "src/test/java"
+        default: "src/main/java,src/test/java"
         type: string
       binaries:
-        description: "Compiled class files"
+        description: "Compiled classes path"
         required: false
         default: "target/classes"
         type: string
@@ -28,9 +23,14 @@ on:
         default: "**/*.js"
         type: string
       jacoco-report:
-        description: "Path to JaCoCo XML report"
+        description: "JaCoCo XML coverage report path"
         required: false
         default: "target/site/jacoco/jacoco.xml"
+        type: string
+      scanner-tool:
+        description: "Scanner tool, e.g., sonar-scanner or mvn"
+        required: false
+        default: "mvn"
         type: string
 
     secrets:
@@ -55,12 +55,23 @@ jobs:
       - name: Run SonarQube Scan
         run: |
           echo "Running SonarQube scan for project: ${{ inputs['project-key'] }}"
-          mvn sonar:sonar \
-            -Dsonar.projectKey=${{ inputs['project-key'] }} \
-            -Dsonar.sources="${{ inputs['main-sources'] }}" \
-            -Dsonar.tests="${{ inputs['test-sources'] }}" \
-            -Dsonar.java.binaries="${{ inputs.binaries }}" \
-            -Dsonar.exclusions="${{ inputs.exclusions }}" \
-            -Dsonar.coverage.jacoco.xmlReportPaths="${{ inputs['jacoco-report'] }}" \
-            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+          if [[ "${{ inputs['scanner-tool'] }}" == "mvn" ]]; then
+            mvn sonar:sonar \
+              -Dsonar.projectKey=${{ inputs['project-key'] }} \
+              -Dsonar.sources="${{ inputs.sources }}" \
+              -Dsonar.java.binaries="${{ inputs.binaries }}" \
+              -Dsonar.exclusions="${{ inputs.exclusions }}" \
+              -Dsonar.coverage.jacoco.xmlReportPaths="${{ inputs['jacoco-report'] }}" \
+              -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+              -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+          else
+            # Assume scanner-tool is sonar-scanner CLI
+            "${{ inputs['scanner-tool'] }}/bin/sonar-scanner" \
+              -Dsonar.projectKey="${{ inputs['project-key'] }}" \
+              -Dsonar.sources="${{ inputs.sources }}" \
+              -Dsonar.java.binaries="${{ inputs.binaries }}" \
+              -Dsonar.exclusions="${{ inputs.exclusions }}" \
+              -Dsonar.coverage.jacoco.xmlReportPaths="${{ inputs['jacoco-report'] }}" \
+              -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+              -Dsonar.login=${{ secrets.SONAR_TOKEN }}"
+          fi
