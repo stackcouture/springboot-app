@@ -8,9 +8,14 @@ on:
         required: true
         type: string
       sources:
-        description: "Source directories to scan (comma-separated)"
+        description: "Source directories (comma-separated)"
         required: false
-        default: "src/main/java,src/test/java"
+        default: "src/main/java"
+        type: string
+      tests:
+        description: "Test directories (comma-separated)"
+        required: false
+        default: "src/test/java"
         type: string
       binaries:
         description: "Compiled classes path"
@@ -28,7 +33,7 @@ on:
         default: "target/site/jacoco/jacoco.xml"
         type: string
       scanner-tool:
-        description: "Scanner tool, e.g., sonar-scanner or mvn"
+        description: "Scanner tool, e.g., mvn or sonar-scanner"
         required: false
         default: "mvn"
         type: string
@@ -41,16 +46,21 @@ on:
 
 jobs:
   sonar-scan:
-    runs-on: Agent-1
+    runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Java
+      - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: temurin
+
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: 3.9.6
 
       - name: Run SonarQube Scan
         run: |
@@ -59,18 +69,18 @@ jobs:
             mvn sonar:sonar \
               -Dsonar.projectKey="${{ inputs['project-key'] }}" \
               -Dsonar.sources="${{ inputs.sources }}" \
-              -Dsonar.tests="${{ inputs.sources }}" \
+              -Dsonar.tests="${{ inputs.tests }}" \
               -Dsonar.java.binaries="${{ inputs.binaries }}" \
               -Dsonar.exclusions="${{ inputs.exclusions }}" \
               -Dsonar.coverage.jacoco.xmlReportPaths="${{ inputs['jacoco-report'] }}" \
               -Dsonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
               -Dsonar.login="${{ secrets.SONAR_TOKEN }}"
           else
-            # Use Sonar Scanner CLI
+            # sonar-scanner CLI
             ${{ inputs['scanner-tool'] }}/bin/sonar-scanner \
               -Dsonar.projectKey="${{ inputs['project-key'] }}" \
               -Dsonar.sources="${{ inputs.sources }}" \
-              -Dsonar.tests="${{ inputs.sources }}" \
+              -Dsonar.tests="${{ inputs.tests }}" \
               -Dsonar.java.binaries="${{ inputs.binaries }}" \
               -Dsonar.exclusions="${{ inputs.exclusions }}" \
               -Dsonar.coverage.jacoco.xmlReportPaths="${{ inputs['jacoco-report'] }}" \
