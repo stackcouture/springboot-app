@@ -21,7 +21,7 @@ jobs:
           echo "Commit SHA with build number: $COMMIT_SHA_WITH_BUILD"
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: Agent-1
     needs: checkout
     steps:
       - name: Checkout Repo
