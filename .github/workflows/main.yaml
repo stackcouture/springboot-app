@@ -70,11 +70,12 @@ jobs:
 
   
   sonar-scan:
-    needs: build
+    needs: security-fs-scan
     uses: ./.github/workflows/sonar-scan.yaml
     with:
       project-key: sprintboot-app
-      sources: src/main/java,src/test/java
+      main-sources: src/main/java
+      test-sources: src/test/java
       binaries: target/classes
       exclusions: "**/*.js"
       jacoco-report: target/site/jacoco/jacoco.xml
