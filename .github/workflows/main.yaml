@@ -61,12 +61,18 @@ jobs:
         with:
           name: jacoco-report
           path: target/site/jacoco/
+      
+      - name: Test SonarQube connectivity
+        run: |
+          curl -v ${{ secrets.SONAR_HOST_URL }}
 
   security-fs-scan:
     needs: build
     uses: ./.github/workflows/trivy-fs.yaml
     with:
       scan-path: .
+
+    
   
   # sonar-scan:
   #   needs: security-fs-scan
