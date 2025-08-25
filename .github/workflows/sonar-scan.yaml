@@ -1,0 +1,60 @@
+name: SonarQube Scan
+
+on:
+  workflow_call:
+    inputs:
+      project-key:
+        description: "SonarQube project key"
+        required: true
+        type: string
+      sources:
+        description: "Source directories to scan"
+        required: false
+        default: "src/main/java,src/test/java"
+        type: string
+      binaries:
+        description: "Compiled class files"
+        required: false
+        default: "target/classes"
+        type: string
+      exclusions:
+        description: "File patterns to exclude"
+        required: false
+        default: "**/*.js"
+        type: string
+      jacoco-report:
+        description: "Path to JaCoCo XML report"
+        required: false
+        default: "target/site/jacoco/jacoco.xml"
+        type: string
+
+    secrets:
+      SONAR_TOKEN:
+        required: true
+      SONAR_HOST_URL:
+        required: true
+
+jobs:
+  sonar-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: temurin
+
+      - name: Run SonarQube Scan
+        run: |
+          echo "Running SonarQube scan for project: ${{ inputs['project-key'] }}"
+          mvn sonar:sonar \
+            -Dsonar.projectKey=${{ inputs['project-key'] }} \
+            -Dsonar.sources="${{ inputs.sources }}" \
+            -Dsonar.java.binaries="${{ inputs.binaries }}" \
+            -Dsonar.exclusions="${{ inputs.exclusions }}" \
+            -Dsonar.coverage.jacoco.xmlReportPaths="${{ inputs['jacoco-report'] }}" \
+            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}

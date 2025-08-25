@@ -20,7 +20,7 @@ jobs:
           echo "COMMIT_SHA_WITH_BUILD=$COMMIT_SHA_WITH_BUILD" >> $GITHUB_ENV
           echo "Commit SHA with build number: $COMMIT_SHA_WITH_BUILD"
 
-  maven:
+  build:
     runs-on: ubuntu-latest
     needs: checkout
     steps:
@@ -62,11 +62,27 @@ jobs:
           name: jacoco-report
           path: target/site/jacoco/
 
-  trivy-fs-scan:
-    needs: maven
+  security-fs-scan:
+    needs: build
     uses: ./.github/workflows/trivy-fs.yaml
     with:
       scan-path: .
+
+  
+  sonar-scan:
+    needs: build
+    uses: ./.github/workflows/sonar-scan.yaml
+    with:
+      project-key: sprintboot-app
+      sources: src/main/java,src/test/java
+      binaries: target/classes
+      exclusions: "**/*.js"
+      jacoco-report: target/site/jacoco/jacoco.xml
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+  
 
 
 
