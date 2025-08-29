@@ -9,7 +9,7 @@ RUN mvn dependency:go-offline -B
 
 # Now copy the source and build the app
 COPY src ./src
-RUN mvn clean package -DskipTests && cp target/*.jar target/app.jar
+RUN mvn clean package  && cp target/*.jar target/app.jar
 
 # ------------ Stage 2: Create minimal runtime image ------------
 FROM 104824081961.dkr.ecr.ap-south-1.amazonaws.com/eclipse-temurin:17-jre-alpine

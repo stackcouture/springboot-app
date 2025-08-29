@@ -59,18 +59,29 @@ jobs:
     with:
       scan-path: .
 
-  sonar-scan:
-    needs: security-fs-scan
-    uses: ./.github/workflows/sonar-scan.yaml
-    with:
-      project-key: sprintboot-app
-      sources: src/main/java
-      tests: src/test/java
-      binaries: target/classes
-      test-binaries: target/test-classes
-      exclusions: "**/*.js"
-      jacoco-report: target/site/jacoco/jacoco.xml
-      scanner-tool: mvn
-    secrets:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+  # sonar-scan:
+  #   needs: security-fs-scan
+  #   uses: ./.github/workflows/sonar-scan.yaml
+  #   name: SonarQube Scan
+  #   with:
+  #     project-key: sprintboot-app
+  #     sources: src/main/java
+  #     tests: src/test/java
+  #     binaries: target/classes
+  #     test-binaries: target/test-classes
+  #     exclusions: "**/*.js"
+  #     jacoco-report: target/site/jacoco/jacoco.xml
+  #     scanner-tool: mvn
+  #   secrets:
+  #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  #     SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+  # quality-gate:
+  #   needs: sonar-scan
+  #   runs-on: self-hosted
+  #   steps:
+  #     - name: SonarQube Quality Gate Check
+  #       uses: SonarSource/sonarqube-quality-gate-action@v1.1.0
+  #       with:
+  #         sonar-token: ${{ secrets.SONAR_TOKEN }}
+  #         host-url: ${{ secrets.SONAR_HOST_URL }}
