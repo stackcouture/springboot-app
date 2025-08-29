@@ -14,27 +14,38 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      # 1️⃣ Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
+      # 2️⃣ Cache Trivy DB to speed up scans
       - name: Cache Trivy DB
         uses: actions/cache@v4
         with:
           path: ~/.cache/trivy
-          key: trivy-db
+          key: trivy-db-${{ runner.os }}
+          restore-keys: trivy-db-${{ runner.os }}
 
-      - name: Run Trivy FS Scan with custom HTML template
+      # 3️⃣ Download Trivy HTML template locally
+      - name: Download Trivy HTML template
+        run: |
+          mkdir -p contrib
+          curl -sSL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -o contrib/html.tpl
+
+      # 4️⃣ Run Trivy filesystem scan with the custom HTML template
+      - name: Run Trivy FS Scan with HTML report
         uses: aquasecurity/trivy-action@0.28.0
         with:
           scan-type: fs
           scan-ref: ${{ inputs.scan-path }}
           format: template
-          template: https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl
+          template: ./contrib/html.tpl
           output: trivy-fs-report.html
 
-      - name: Upload Trivy FS Report as artifact
+      # 5️⃣ Upload the HTML report as an artifact
+      - name: Upload Trivy FS Report
         uses: actions/upload-artifact@v4
         with:
           name: trivy-fs-report
