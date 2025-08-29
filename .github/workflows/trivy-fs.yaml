@@ -26,7 +26,7 @@ jobs:
           key: trivy-db
 
       - name: Run Trivy FS Scan with custom HTML template
-        uses: aquasecurity/trivy-action@v1
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           scan-type: fs
           scan-ref: ${{ inputs.scan-path }}
