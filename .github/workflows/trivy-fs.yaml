@@ -14,13 +14,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      # 1️⃣ Checkout the repository
+      # 1️⃣ Checkout repository
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      # 2️⃣ Cache Trivy DB to speed up scans
+      # 2️⃣ Cache Trivy DB for faster scans
       - name: Cache Trivy DB
         uses: actions/cache@v4
         with:
@@ -28,7 +28,7 @@ jobs:
           key: trivy-db-${{ runner.os }}
           restore-keys: trivy-db-${{ runner.os }}
 
-      # 3️⃣ Run Trivy filesystem scan with JSON output
+      # 3️⃣ Run Trivy FS scan with JSON output
       - name: Run Trivy FS Scan (JSON)
         uses: aquasecurity/trivy-action@0.28.0
         with:
@@ -37,16 +37,73 @@ jobs:
           format: json
           output: trivy-fs-report.json
 
-      # 4️⃣ Optional: Convert JSON to simple HTML view
-      - name: Convert JSON to HTML
+      # 4️⃣ Generate fully dynamic HTML report
+      - name: Generate dynamic HTML report
         run: |
           mkdir -p trivy-report
-          cat <<EOF > trivy-report/trivy-fs-report.html
-          <html>
-          <head><title>Trivy FS Scan Report</title></head>
+          cat <<'EOF' > trivy-report/trivy-fs-report.html
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+          <meta charset="UTF-8">
+          <title>Trivy FS Scan Report</title>
+          <style>
+            body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; }
+            h1 { color: #333; }
+            details { margin-bottom: 10px; background: #fff; padding: 10px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+            summary { font-weight: bold; cursor: pointer; }
+            .LOW { color: green; font-weight: bold; }
+            .MEDIUM { color: orange; font-weight: bold; }
+            .HIGH { color: red; font-weight: bold; }
+            .CRITICAL { color: darkred; font-weight: bold; }
+            table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+            th, td { border: 1px solid #ccc; padding: 5px; text-align: left; }
+            th { background: #eee; }
+          </style>
+          </head>
           <body>
-          <h1>Filesystem Scan Report</h1>
-          <pre>\$(jq . trivy-fs-report.json)</pre>
+          <h1>Trivy Filesystem Scan Report</h1>
+          <div id="report"></div>
+          <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+          <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+          <script>
+          const data = JSON.parse(`$(cat trivy-fs-report.json)`);
+
+          data.Results.forEach(result => {
+              const detail = document.createElement('details');
+              const summary = document.createElement('summary');
+              summary.textContent = result.Target + ' (' + (result.Vulnerabilities ? result.Vulnerabilities.length : 0) + ' vulnerabilities)';
+              detail.appendChild(summary);
+
+              if(result.Vulnerabilities && result.Vulnerabilities.length > 0){
+                  const table = document.createElement('table');
+                  const header = document.createElement('tr');
+                  ['Severity','Vulnerability','Package','Installed Version','Fixed Version','Description'].forEach(h => {
+                      const th = document.createElement('th');
+                      th.textContent = h;
+                      header.appendChild(th);
+                  });
+                  table.appendChild(header);
+
+                  result.Vulnerabilities.forEach(v => {
+                      const tr = document.createElement('tr');
+                      tr.innerHTML = `
+                        <td class="${v.Severity}">${v.Severity}</td>
+                        <td><a href="${v.PrimaryURL}" target="_blank">${v.VulnerabilityID}</a></td>
+                        <td>${v.PkgName}</td>
+                        <td>${v.InstalledVersion}</td>
+                        <td>${v.FixedVersion || ''}</td>
+                        <td>${v.Description || ''}</td>
+                      `;
+                      table.appendChild(tr);
+                  });
+
+                  detail.appendChild(table);
+              }
+
+              document.getElementById('report').appendChild(detail);
+          });
+          </script>
           </body>
           </html>
           EOF
