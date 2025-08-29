@@ -12,7 +12,7 @@ on:
 jobs:
   trivy-fs-scan:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       # 1️⃣ Checkout the repository
       - name: Checkout code
@@ -28,25 +28,39 @@ jobs:
           key: trivy-db-${{ runner.os }}
           restore-keys: trivy-db-${{ runner.os }}
 
-      # 3️⃣ Download Trivy HTML template locally
-      - name: Download Trivy HTML template
-        run: |
-          mkdir -p contrib
-          curl -sSL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -o contrib/html.tpl
-
-      # 4️⃣ Run Trivy filesystem scan with the custom HTML template
-      - name: Run Trivy FS Scan with HTML report
+      # 3️⃣ Run Trivy filesystem scan with JSON output
+      - name: Run Trivy FS Scan (JSON)
         uses: aquasecurity/trivy-action@0.28.0
         with:
           scan-type: fs
           scan-ref: ${{ inputs.scan-path }}
-          format: template
-          template: ./contrib/html.tpl
-          output: trivy-fs-report.html
+          format: json
+          output: trivy-fs-report.json
 
-      # 5️⃣ Upload the HTML report as an artifact
-      - name: Upload Trivy FS Report
+      # 4️⃣ Optional: Convert JSON to simple HTML view
+      - name: Convert JSON to HTML
+        run: |
+          mkdir -p trivy-report
+          cat <<EOF > trivy-report/trivy-fs-report.html
+          <html>
+          <head><title>Trivy FS Scan Report</title></head>
+          <body>
+          <h1>Filesystem Scan Report</h1>
+          <pre>\$(jq . trivy-fs-report.json)</pre>
+          </body>
+          </html>
+          EOF
+
+      # 5️⃣ Upload JSON report as artifact
+      - name: Upload JSON report
         uses: actions/upload-artifact@v4
         with:
-          name: trivy-fs-report
-          path: trivy-fs-report.html
+          name: trivy-fs-report-json
+          path: trivy-fs-report.json
+
+      # 6️⃣ Upload HTML report as artifact
+      - name: Upload HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-fs-report-html
+          path: trivy-report/trivy-fs-report.html
