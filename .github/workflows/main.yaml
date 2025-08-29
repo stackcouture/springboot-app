@@ -8,7 +8,7 @@ on:
 
 jobs:
   checkout:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
@@ -22,7 +22,7 @@ jobs:
           echo "Commit SHA with build number: $COMMIT_SHA_WITH_BUILD"
 
   build:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: checkout
     steps:
       - name: Checkout Repo
